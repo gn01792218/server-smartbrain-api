@@ -82,35 +82,47 @@ app.post("/sigin", (req, res) => {
 app.post("/register", (req, res) => {
   const { name, email, password } = req.body;
   // let hashPassword = "";
-  // dbUsers++
-  // const userData = {
-  //   id: dbUsers,
-  //   name: name,
-  //   email: email,
-  //   entries: 0,
-  //   joined: new Date(),
-  // };
-  db('users')
-  .returning('*')  //會回傳插入的所有資料
-  .insert({
-    name:name,
-    email:email,
-    joined:new Date()
-  })
-  .then(user=>{
-    console.log(user)
-    res.json(user[0])
-  })
-  .catch(err=>{
-    res.status(400).json(err)
-  })
-  // bcrypt.hash(password, 10, function (err, hash) {
-  //   hashPassword = hash;
-  //   userData.password = hashPassword
-  //   db.users.push(userData);
-  //   console.log(userData)
-  //   res.json(userData);
-  // });
+  // db('users')
+  // .returning('*')  //會回傳插入的所有資料
+  // .insert({
+  //   name:name,
+  //   email:email,
+  //   joined:new Date()
+  // })
+  // .then(user=>{
+  //   console.log(user)
+  //   res.json(user[0])
+  // })
+  // .catch(err=>{
+  //   res.status(400).json(err)
+  // })
+  bcrypt.hash(password, 10, function (err, hash) {
+    db.transaction(trx=>{
+      trx.insert({
+        hashpassword:hase,
+        email:email,
+      })
+      .into('login')
+      .returning('email')
+      .then(res=>{
+        trx('users')
+        .insert({
+          email:res[0],
+          name:name,
+          joined:new Date()
+        })
+        .returning('*')
+        .then(user=>{
+          res.json(user[0])
+        })
+        
+      })
+    })
+    // hashPassword = hash;
+    // userData.password = hashPassword
+    // db.users.push(userData);
+    // res.json(userData);
+  });
 });
 app.get("/profile/:id", (req, res) => {
   const { id } = req.params;
