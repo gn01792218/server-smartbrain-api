@@ -4,18 +4,18 @@ const cors = require('cors')
 const express = require("express");
 const knex = require('knex');
 const db = knex({
-  client:'pg',
-  connection:{
-    host:'127.0.0.1',
-    user:'postgres',
-    password:process.env.DB_PWD,
-    database:'smartbrainDB'
-  }  
+  client: 'pg',
+  connection: {
+    host: '127.0.0.1',
+    user: 'postgres',
+    password: process.env.DB_PWD,
+    database: 'smartbrainDB'
+  }
 })
 
-db.select('*').from('users').then(data=>{
-  console.log(data)
-})
+// db.select('*').from('users').then(data=>{
+//   console.log(data)
+// })
 const app = express();
 app.use(cors())
 app.use(express.urlencoded({ extended: false }));
@@ -33,7 +33,7 @@ app.listen(3500, () => {
 */
 
 //二、模擬一下Database假資料
-let dbUsers=0
+let dbUsers = 0
 // const db = {
 //   users: [
 //     // {
@@ -48,94 +48,77 @@ let dbUsers=0
 // };
 
 app.get("/", (req, res) => {
-  console.log('有人要求/',db.users)
-  res.json(db.users);
+  console.log('有人要求/', db.users)
+  // res.json(db.users);
 });
 app.post("/sigin", (req, res) => {
   //假如使用者POST的資料和DB中的email及password相符，就回應sucess
   const { email, password } = req.body;
   let checkHashPassword = false;
-  const user = db.users.find(user=>{
-    console.log(user)
+  const user = db.users.find(user => {
+    // console.log(user)
     return user.email === email
   })
-  console.log(user)
-  if(!user) return 
+  // console.log(user)
+  if (!user) return
   bcrypt.compare(password, db.users[0].password, function (err, result) {
     if (result) {
-        checkHashPassword = true;
-        console.log('通過!',checkHashPassword)
-        const userData = {
-          id:user.id,
-          name:user.name,
-          email:user.email,
-          entries:user.entries,
-          joined:user.joined
-        }
-        res.json(userData);
-    }else {
+      checkHashPassword = true;
+      console.log('通過!', checkHashPassword)
+      const userData = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        entries: user.entries,
+        joined: user.joined
+      }
+      res.json(userData);
+    } else {
       res.status(400).json("login fail");
     }
   });
-  
+
 });
 app.post("/register", (req, res) => {
   const { name, email, password } = req.body;
-  // let hashPassword = "";
-  // db('users')
-  // .returning('*')  //會回傳插入的所有資料
-  // .insert({
-  //   name:name,
-  //   email:email,
-  //   joined:new Date()
-  // })
-  // .then(user=>{
-  //   console.log(user)
-  //   res.json(user[0])
-  // })
-  // .catch(err=>{
-  //   res.status(400).json(err)
-  // })
   bcrypt.hash(password, 10, function (err, hash) {
     db.transaction(trx=>{
       trx.insert({
-        hashpassword:hase,
+        hashpassword:hash,
         email:email,
       })
       .into('login')
       .returning('email')
-      .then(res=>{
+      .then(dbEmail=>{
         trx('users')
         .insert({
-          email:res[0],
+          email:dbEmail[0],
           name:name,
           joined:new Date()
         })
         .returning('*')
         .then(user=>{
+          console.log(user[0])
           res.json(user[0])
         })
-        
       })
+      .then(trx.commit)
+      .catch(trx.rollback)
     })
-    // hashPassword = hash;
-    // userData.password = hashPassword
-    // db.users.push(userData);
-    // res.json(userData);
   });
 });
 app.get("/profile/:id", (req, res) => {
   const { id } = req.params;
   // let found = false;
-  db.select('*').from('users').where({id})
-  .then(user=>{ //找不到會回傳空陣列
-    if(user.length){
-      res.json(user[0])
-    }else{
-      res.status(400).json('Not found')
-    }
-  })
-  .catch(err=>res.status(400).json(err))
+  db.select('*').from('users').where({ id })
+    .then(user => { //找不到會回傳空陣列
+      if (user.length) {
+        res.json(user[0])
+      } else {
+        res.status(400).json('Not found')
+      }
+    })
+    .catch(err => res.status(400).json(err))
   // db.users.forEach((user) => {
   //   if (user.id === id) {
   //     found = true;
@@ -148,13 +131,13 @@ app.get("/profile/:id", (req, res) => {
 });
 app.put("/image", (req, res) => {
   const { id } = req.body;
-  db('users').where({id})
-  .increment('entries',1)
-  .returning('entries')
-  .then(entries=>{
-    res.json(entries[0]);
-  })
-  .catch(err=>res.status(400).json('err'))
+  db('users').where({ id })
+    .increment('entries', 1)
+    .returning('entries')
+    .then(entries => {
+      res.json(entries[0]);
+    })
+    .catch(err => res.status(400).json('err'))
   // console.log(id)
   // let found = false;
   // db.users.forEach((user) => {
