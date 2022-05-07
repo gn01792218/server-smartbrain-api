@@ -54,56 +54,76 @@ app.get("/", (req, res) => {
 app.post("/sigin", (req, res) => {
   //假如使用者POST的資料和DB中的email及password相符，就回應sucess
   const { email, password } = req.body;
-  let checkHashPassword = false;
-  const user = db.users.find(user => {
-    // console.log(user)
-    return user.email === email
-  })
-  // console.log(user)
-  if (!user) return
-  bcrypt.compare(password, db.users[0].password, function (err, result) {
-    if (result) {
-      checkHashPassword = true;
-      console.log('通過!', checkHashPassword)
-      const userData = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        entries: user.entries,
-        joined: user.joined
+  console.log(email)
+  db.select('*').from('login').where('email','=',email)
+    .then(loginData => {
+      console.log(loginData[0])
+      if (loginData.length) {
+        bcrypt.compare(password, loginData[0].hashpassword, function (err, result) {
+          if (result) {
+            console.log(result)
+           db.select('*').from('users').where('email','=',email)
+              .then(user => {
+                res.json(user[0])
+              })
+              .catch(err=>{
+                res.status(400).json(err)
+              })
+          }
+        })
+      }else{
+        res.status(400).json('login fail')
       }
-      res.json(userData);
-    } else {
-      res.status(400).json("login fail");
-    }
-  });
+    })
+    .catch(err=>{
+      res.jstatus(400).json(err)
+    })
+  // const user = db.users.find(user => {
+  //   return user.email === email
+  // })
+  // if (!user) return
+  // bcrypt.compare(password, db.users[0].password, function (err, result) {
+  //   if (result) {
+  //     const userData = {
+  //       id: user.id,
+  //       name: user.name,
+  //       email: user.email,
+  //       entries: user.entries,
+  //       joined: user.joined
+  //     }
+  //     res.json(userData);
+  //   } else {
+  //     res.status(400).json("login fail");
+  //   }
+  // });
 
 });
 app.post("/register", (req, res) => {
   const { name, email, password } = req.body;
   bcrypt.hash(password, 10, function (err, hash) {
-    db.transaction(trx=>{
+    db.transaction(trx => {
       trx.insert({
-        hashpassword:hash,
-        email:email,
+        hashpassword: hash,
+        email: email,
       })
-      .into('login')
-      .returning('email')
-      .then(dbEmail=>{
-        trx('users')
-        .insert({
-          email:dbEmail[0],
-          name:name,
-          joined:new Date()
+        .into('login')
+        .returning('email')
+        .then(dbEmail => {
+          console.log(dbEmail[0])
+          trx('users')
+            .insert({
+              email: dbEmail[0].email,
+              name: name,
+              joined: new Date()
+            })
+            .returning('*')
+            .then(user => {
+              console.log(user[0])
+              res.json(user[0])
+            })
         })
-        .returning('*')
-        .then(user=>{
-          console.log(user[0])
-          res.json(user[0])
-        })
-      })
-      .then(trx.commit)
-      .catch(trx.rollback)
+        .then(trx.commit)
+        .catch(trx.rollback)
     })
   });
 });
