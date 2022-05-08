@@ -9,7 +9,7 @@ const handleRegister = require('./controllers/register').handleRegister
 const handleSigin = require('./controllers/sigin').handleSigin
 const handleProfile = require('./controllers/profile').handleProfile
 const handleImage = require('./controllers/image').handleImage
-
+const handleClarifaiCall = require('./controllers/image').handleClarifaiCall
 app.use(cors())
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -38,3 +38,4 @@ app.post("/sigin",handleSigin(db,bcrypt))
 app.post("/register",handleRegister(db,bcrypt))
 app.get("/profile/:id",handleProfile(db))
 app.put("/image",handleImage(db))
+app.post("/imageurl",handleClarifaiCall())

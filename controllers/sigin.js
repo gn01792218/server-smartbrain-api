@@ -1,7 +1,7 @@
 const handleSigin = (db,bcrypt) => (req,res) => {
     //假如使用者POST的資料和DB中的email及password相符，就回應sucess
   const { email, password } = req.body;
-  console.log(email)
+  if (!email || !password) return res.status(400).json('incorrect form submission')
   db.select('*').from('login').where('email','=',email)
     .then(loginData => {
       console.log(loginData[0])
