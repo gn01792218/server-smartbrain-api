@@ -47,6 +47,9 @@ const db = knex({
     4./profile/:userId==>GET==>userObject
     5./image==>PUT==>userObject
 */
+app.get("/",(req,res)=>{
+  res.json("<h1>Hellow</h1>")
+})
 app.post("/sigin",handleSigin(db,bcrypt))
 app.post("/register",handleRegister(db,bcrypt))
 app.get("/profile/:id",handleProfile(db))
