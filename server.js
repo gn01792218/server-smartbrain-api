@@ -10,6 +10,7 @@ const handleSigin = require('./controllers/sigin').handleSigin
 const handleProfile = require('./controllers/profile').handleProfile
 const handleImage = require('./controllers/image').handleImage
 const handleClarifaiCall = require('./controllers/image').handleClarifaiCall
+
 app.use(cors())
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
