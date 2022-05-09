@@ -14,15 +14,29 @@ const handleClarifaiCall = require('./controllers/image').handleClarifaiCall
 app.use(cors())
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+// app.listen(3500, () => {
+//   console.log(`server is listing ${3500}`);
+// });
 app.listen(process.env.PORT, () => {
   console.log(`server is listing ${process.env.PORT}`);
 });
 
+// const db = knex({
+//   client:'pg',
+//   connection:{
+//     host:'127.0.0.1',
+//     user:'postgres',
+//     password:'twshhcaala096221',
+//     database:'smartbrainDB'
+//   }  
+// })
 const db = knex({
   client: 'pg',
   connection: {
     connectionString:process.env.DATABASE_URL,
-    ssl:true,
+    ssl: {
+      rejectUnauthorized: false
+    }
   }
 })
 /*
