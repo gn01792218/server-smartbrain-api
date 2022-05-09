@@ -6,18 +6,28 @@ const handleSigin = (db,bcrypt) => (req,res) => {
     .then(loginData => {
       console.log(loginData[0])
       if (loginData.length) {
-        bcrypt.compare(password, loginData[0].hashpassword, function (err, result) {
-          if (result) {
-            console.log(result)
-           db.select('*').from('users').where('email','=',email)
+        let comparePassword = bcrypt.compareSync(password,loginData[0].hashpassword)
+        if(comparePassword){
+          db.select('*').from('users').where('email','=',email)
               .then(user => {
                 res.json(user[0])
               })
               .catch(err=>{
                 res.status(400).json(err)
               })
-          }
-        })
+        }
+        // bcrypt.compare(password, loginData[0].hashpassword, function (err, result) {
+        //   if (result) {
+        //     console.log(result)
+        //    db.select('*').from('users').where('email','=',email)
+        //       .then(user => {
+        //         res.json(user[0])
+        //       })
+        //       .catch(err=>{
+        //         res.status(400).json(err)
+        //       })
+        //   }
+        // })
       }else{
         res.status(400).json('login fail')
       }

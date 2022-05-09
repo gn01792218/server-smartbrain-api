@@ -1,5 +1,5 @@
 require('dotenv').config()
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const cors = require('cors')
 const express = require("express");
 const knex = require('knex');
