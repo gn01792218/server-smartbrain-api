@@ -15,3 +15,11 @@ services:
     build: ./postgres
     ports:
       - "5432:5432"
+  #pgadmin
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=gn01792218@hotmail.com
+      - PGADMIN_DEFAULT_PASSWORD=twshhcaala096221
+    ports:
+      - "5050:80"
