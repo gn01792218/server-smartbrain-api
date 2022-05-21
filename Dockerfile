@@ -1,5 +1,7 @@
-FROM node:14.17.4
-WORKDIR /usr/src/smartbrain-api
-COPY ./ ./
+FROM node:14
+WORKDIR /usr/src/app
+COPY package.json ./
 RUN npm i
-CMD ["/bin/bash"]
+COPY . .
+
+CMD ["npm","start"]

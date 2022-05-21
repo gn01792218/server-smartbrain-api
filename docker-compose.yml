@@ -2,14 +2,13 @@ version: '3.9'
 services:
   #backend-api
   smartbrain-api:
-    container_name: smartbrain-api
-    build: ./
+    build: .
     command: npm run start
-    working_dir: /usr/src/smartbrain-api
+    working_dir: /usr/src/app
     ports:
-      - "3500:3500"
+      - 3500:3500
     volumes:
-      - ./:/usr/src/smartbrain-api
+      - .:/usr/src/app
   #postgres
   postgres:
     build: ./postgres
